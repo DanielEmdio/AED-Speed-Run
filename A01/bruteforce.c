@@ -1,13 +1,13 @@
+#define _max_road_size_  800  // the maximum problem size
+#define _min_road_speed_   2  // must not be smaller than 1, shouldnot be smaller than 2
+#define _max_road_speed_   9  // must not be larger than 9 (only because of the PDF figure)
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "make_custom_pdf.c"
 #include "../P02/elapsed_time.h"
-
-#define _max_road_size_  800  // the maximum problem size
-#define _min_road_speed_   2  // must not be smaller than 1, shouldnot be smaller than 2
-#define _max_road_speed_   9  // must not be larger than 9 (only because of the PDF figure)
 
 // change macros to change the solving method
 #define USE_SOLVE_1 0
@@ -45,8 +45,22 @@ static solution_t solution_3, solution_3_best;
 static double solution_3_elapsed_time; // time it took to solve the problem
 static unsigned long solution_3_count; // effort dispended solving the problem
 
-static int solution_3_DP(int move_number, int position, int speed, int final_position) {
+static int DP[9][1 + _max_road_size_]; // array used as a buffer for dynamic programming
 
+static void solution_3_DP(int move_number, int position, int speed, int final_position) {
+  if (position == 0)
+  {
+    return;
+  }
+
+  if (DP[position] > -1)
+  {
+    return;
+  }
+
+  solution_3_DP(move_number + 1, position - speed - 1, speed - 1, final_position);
+  solution_3_DP(move_number + 1, position - speed - 0, speed - 0, final_position);
+  solution_3_DP(move_number + 1, position - speed + 1, speed + 1, final_position);
 }
 
 static void solve_3(int final_position)
@@ -60,7 +74,10 @@ static void solve_3(int final_position)
   solution_3_elapsed_time = cpu_time();
   solution_3_count = 0ul;
   solution_3_best.n_moves = final_position + 100;
-  solution_3_DP(0, 0 ,0 , final_position);
+
+  for (int i = 0; i < 1 + final_position; i++) DP[i] = -1;
+
+  solution_3_DP(0, 1 + final_position, 1, 0);
   solution_3_elapsed_time = cpu_time() - solution_3_elapsed_time;
 }
 
@@ -192,10 +209,6 @@ static void example(void)
 
 #if USE_SOLVE_1
   solve_1(final_position);
-  printf("boas\n");
-#endif
-
-  
   make_custom_pdf_file("example.pdf",final_position,&max_road_speed[0],solution_1_best.n_moves,&solution_1_best.positions[0],solution_1_elapsed_time,solution_1_count,"Plain recursion");
   printf("mad road speeds:");
   for(i = 0;i <= final_position;i++)
@@ -204,18 +217,9 @@ static void example(void)
   printf("positions:");
   for(i = 0;i <= solution_1_best.n_moves;i++)
     printf(" %d",solution_1_best.positions[i]);
-  printf("\n");
-}
-
-/*static void example_with2(void)
-{
-  int i,final_position;
-
-  srandom(0xAED2022);
-  init_road_speeds();
-  final_position = 30;
+#elif USE_SOLVE_2
   solve_2(final_position);
-  make_custom_pdf_file("example.pdf",final_position,&max_road_speed[0],solution_2_best.n_moves,&solution_2_best.positions[0],solution_2_elapsed_time,solution_2_count,"Plain recursion");
+  make_custom_pdf_file("example.pdf",final_position,&max_road_speed[0],solution_2_best.n_moves,&solution_2_best.positions[0],solution_2_elapsed_time,solution_2_count,"Clever Bruteforcing");
   printf("mad road speeds:");
   for(i = 0;i <= final_position;i++)
     printf(" %d",max_road_speed[i]);
@@ -223,8 +227,20 @@ static void example(void)
   printf("positions:");
   for(i = 0;i <= solution_2_best.n_moves;i++)
     printf(" %d",solution_2_best.positions[i]);
+#elif USE_SOLVE_3
+  solve_3(final_position);
+  make_custom_pdf_file("example.pdf",final_position,&max_road_speed[0],solution_3_best.n_moves,&solution_3_best.positions[0],solution_3_elapsed_time,solution_3_count,"DP");
+  printf("mad road speeds:");
+  for(i = 0;i <= final_position;i++)
+    printf(" %d",max_road_speed[i]);
   printf("\n");
-}*/
+  printf("positions:");
+  for(i = 0;i <= solution_3_best.n_moves;i++)
+    printf(" %d",solution_3_best.positions[i]);
+#endif
+  
+  printf("\n");
+}
 
 int main(int argc,char *argv[argc + 1])
 {
@@ -258,7 +274,7 @@ int main(int argc,char *argv[argc + 1])
     print_this_one = (final_position == 10 || final_position == 20 || final_position == 50 || final_position == 100 || final_position == 200 || final_position == 400 || final_position == 800) ? 1 : 0;
     printf("%3d |",final_position);
 
-#if 0
+#if USE_SOLVE_1
     // first solution method (very bad)
     if(solution_1_elapsed_time < _time_limit_)
     {
@@ -270,7 +286,7 @@ int main(int argc,char *argv[argc + 1])
       }
       printf(" %3d %16lu %9.3e |",solution_1_best.n_moves,solution_1_count,solution_1_elapsed_time);
     }
-#elif 0
+#elif USE_SOLVE_2
     // first solution method (very bad)
     if(solution_2_elapsed_time < _time_limit_)
     {
@@ -282,7 +298,7 @@ int main(int argc,char *argv[argc + 1])
       }
       printf(" %3d %16lu %9.3e |",solution_2_best.n_moves,solution_2_count,solution_2_elapsed_time);
     }
-#else
+#elif USE_SOLVE_3
     // first solution method (very bad)
     if(solution_3_elapsed_time < _time_limit_)
     {
