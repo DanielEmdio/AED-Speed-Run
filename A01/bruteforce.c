@@ -1,13 +1,18 @@
-#define _max_road_size_  800  // the maximum problem size
-#define _min_road_speed_   2  // must not be smaller than 1, shouldnot be smaller than 2
-#define _max_road_speed_   9  // must not be larger than 9 (only because of the PDF figure)
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "make_custom_pdf.c"
 #include "../P02/elapsed_time.h"
+
+#define _max_road_size_  800  // the maximum problem size
+#define _min_road_speed_   2  // must not be smaller than 1, shouldnot be smaller than 2
+#define _max_road_speed_   9  // must not be larger than 9 (only because of the PDF figure)
+
+// change macros to change the solving method
+#define USE_SOLVE_1 0
+#define USE_SOLVE_2 0
+#define USE_SOLVE_3 1
 
 static int max_road_speed[1 + _max_road_size_]; // positions 0.._max_road_size_
 
@@ -41,7 +46,7 @@ static double solution_3_elapsed_time; // time it took to solve the problem
 static unsigned long solution_3_count; // effort dispended solving the problem
 
 static int solution_3_DP(int move_number, int position, int speed, int final_position) {
-  
+
 }
 
 static void solve_3(int final_position)
@@ -55,7 +60,7 @@ static void solve_3(int final_position)
   solution_3_elapsed_time = cpu_time();
   solution_3_count = 0ul;
   solution_3_best.n_moves = final_position + 100;
-  solution_3_clever_bruteforce(0, 0 ,0 , final_position);
+  solution_3_DP(0, 0 ,0 , final_position);
   solution_3_elapsed_time = cpu_time() - solution_3_elapsed_time;
 }
 
@@ -184,7 +189,13 @@ static void example(void)
   srandom(0xAED2022);
   init_road_speeds();
   final_position = 30;
+
+#if USE_SOLVE_1
   solve_1(final_position);
+  printf("boas\n");
+#endif
+
+  
   make_custom_pdf_file("example.pdf",final_position,&max_road_speed[0],solution_1_best.n_moves,&solution_1_best.positions[0],solution_1_elapsed_time,solution_1_count,"Plain recursion");
   printf("mad road speeds:");
   for(i = 0;i <= final_position;i++)
@@ -196,7 +207,7 @@ static void example(void)
   printf("\n");
 }
 
-static void example_with2(void)
+/*static void example_with2(void)
 {
   int i,final_position;
 
@@ -213,7 +224,7 @@ static void example_with2(void)
   for(i = 0;i <= solution_2_best.n_moves;i++)
     printf(" %d",solution_2_best.positions[i]);
   printf("\n");
-}
+}*/
 
 int main(int argc,char *argv[argc + 1])
 {
@@ -224,7 +235,7 @@ int main(int argc,char *argv[argc + 1])
   // generate the example data
   if(argc == 2 && argv[1][0] == '-' && argv[1][1] == 'e' && argv[1][2] == 'x')
   {
-    example_with2();
+    example();
     return 0;
   }
 

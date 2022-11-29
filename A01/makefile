@@ -5,19 +5,19 @@
 #
 
 clean:
-	rm -rf a.out example.pdf speed_run speed_run_with_zlib solution_speed_run solution_speed_run_with_zlib bruteforce
+	rm -rf a.out *.pdf speed_run speed_run_with_zlib solution_speed_run solution_speed_run_with_zlib bruteforce
 
 bruteforce: bruteforce.c make_custom_pdf.c
-	cc -Wall -O3 -D_use_zlib_=0 bruteforce.c -o bruteforce -lm
+	cc -Wall -Wextra -O3 -D_use_zlib_=0 bruteforce.c -o bruteforce -lm
 
 speed_run:		speed_run.c make_custom_pdf.c
-	cc -Wall -O3 -D_use_zlib_=0 speed_run.c -o speed_run -lm
+	cc -Wall -Wextra -O3 -D_use_zlib_=0 speed_run.c -o speed_run -lm
 
 speed_run_with_zlib:	speed_run.c make_custom_pdf.c
-	cc -Wall -O3 -D_use_zlib_=1 speed_run.c -o speed_run_with_zlib -lm -lz
+	cc -Wall -Wextra -O3 -D_use_zlib_=1 speed_run.c -o speed_run_with_zlib -lm -lz
 
 solution_speed_run:		solution_speed_run.c make_custom_pdf.c
-	cc -Wall -O3 -D_use_zlib_=0 solution_speed_run.c -o solution_speed_run -lm
+	cc -Wall -Wextra -O3 -D_use_zlib_=0 solution_speed_run.c -o solution_speed_run -lm
 
 solution_speed_run_with_zlib:	solution_speed_run.c make_custom_pdf.c
-	cc -Wall -O3 -D_use_zlib_=1 solution_speed_run.c -o solution_speed_run_with_zlib -lm -lz
+	cc -Wall -Wextra -O3 -D_use_zlib_=1 solution_speed_run.c -o solution_speed_run_with_zlib -lm -lz
