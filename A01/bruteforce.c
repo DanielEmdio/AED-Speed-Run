@@ -39,11 +39,11 @@ static solution_t solution, solution_best;
 static double solution_elapsed_time; // time it took to solve the problem
 static unsigned long solution_count; // effort dispended solving the problem
 
-// TESTS
+// DYNAMIC PROGRAMMING 2
 
-static int DP_test[1 + _max_road_size_]; // array used as a buffer for a test solution
+static int DP_test[1 + _max_road_size_]; // array used as a buffer for the second dynamic programming solution
 
-static void solution_4(int move_number, int position, int speed, int final_position) {
+static void solution_4_DP(int move_number, int position, int speed, int final_position) {
   int i, new_speed;
 
   // record move
@@ -67,12 +67,14 @@ static void solution_4(int move_number, int position, int speed, int final_posit
   for(new_speed = speed + 1; new_speed >= speed - 1; new_speed--)
     if(new_speed >= 1 && new_speed <= _max_road_speed_ && position + new_speed <= final_position)
     {
-      for(i = 0; i <= new_speed && new_speed <= max_road_speed[position + i]; i++);
+      for(i = 0; i <= new_speed && new_speed <= max_road_speed[position + i]; i++); // check 'new_speed' in next positions
 
+      // check if the 'move_number' the we have when we get to a certain position is less than the one had did before
+      // or if we have not been on that position at all
       if ((!DP_test[position] || DP_test[position] > move_number) && i > new_speed)
       {
         DP_test[position] = move_number + 1; // update the best path move number
-        solution_4(move_number + 1, position + new_speed, new_speed, final_position);
+        solution_4_DP(move_number + 1, position + new_speed, new_speed, final_position); // recursion
       }
     }
 }
@@ -81,7 +83,7 @@ static void solve_4(int final_position)
 {
   if(final_position < 1 || final_position > _max_road_size_)
   {
-    fprintf(stderr,"solve_3: bad final_position\n");
+    fprintf(stderr,"solve_4: bad final_position\n");
     exit(1);
   }
 
@@ -89,11 +91,10 @@ static void solve_4(int final_position)
   solution_count = 0ul;
   solution_best.n_moves = final_position + 100;
 
-  // initialize array for dynamic programming solution
-  for (int i = 0; i < 1 + final_position; i++)
-    DP_test[i] = 0;
+  // initialize array for second dynamic programming solution
+  for (int i = 0; i < 1 + final_position; i++) DP_test[i] = 0;
 
-  solution_4(0, 0, 0, final_position);
+  solution_4_DP(0, 0, 0, final_position);
 
   /*printf("\n\n");
   for (int i = 0; i < 1 + final_position; i++) {
@@ -104,7 +105,7 @@ static void solve_4(int final_position)
   solution_elapsed_time = cpu_time() - solution_elapsed_time;
 }
 
-// DYNAMIC PROGRAMMING
+// DYNAMIC PROGRAMMING 1
 
 static char DP[1 + _max_road_size_][9]; // array used as a buffer for dynamic programming
 
@@ -134,6 +135,7 @@ static void solution_3_DP(int move_number, int position, int speed, int final_po
     {
       for(i = 0; i <= new_speed && new_speed <= max_road_speed[position + i]; i++);
 
+      // check if the speed we have on the next position is not  bigger than what we had before
       if (!DP[position][new_speed] && i > new_speed) { // make sure we do not redo work
         DP[position][new_speed] = 1; // set the path as done
         solution_3_DP(move_number + 1, position + new_speed, new_speed, final_position);
@@ -174,10 +176,9 @@ static void solve_3(int final_position)
 // CLEVER BRUTEFORCE
 
 static int solution_2_clever_bruteforce(int move_number, int position, int speed, int final_position) {
-  int i, new_speed, used_pos;
+  int i, new_speed;
 
   // record move
-  used_pos = 0;
   solution_count++;
   solution.positions[move_number] = position;
 
@@ -194,16 +195,12 @@ static int solution_2_clever_bruteforce(int move_number, int position, int speed
   for(new_speed = speed + 1; new_speed >= speed - 1; new_speed--){
     if(new_speed >= 1 && new_speed <= _max_road_speed_ && position + new_speed <= final_position)
     {
-      for(i = 0; i <= new_speed && new_speed <= max_road_speed[position + i]; i++); // check next cases
+      for(i = 0; i <= new_speed && new_speed <= max_road_speed[position + i]; i++); // check next positions with the 'new_speed'
 
       if(i > new_speed) {
-        used_pos++;
-        int used_total = 0;
-        for (int j = 1; j <= used_pos; j++) used_total += j;
-
-        if (used_pos + used_total <= final_position)
-          if(!solution_2_clever_bruteforce(move_number + 1, position + new_speed, new_speed, final_position))
-            return 0;
+        // check if we found the solution
+        if(!solution_2_clever_bruteforce(move_number + 1, position + new_speed, new_speed, final_position))
+          return 0;
       }
     }
   }
@@ -309,16 +306,17 @@ static void example(void)
       make_custom_pdf_file("example.pdf",final_position,&max_road_speed[0],solution_best.n_moves,&solution_best.positions[0],solution_elapsed_time,solution_count,"Clever Bruteforcing");
     } else if (solve_to_use == 3)
     {
-      // dynamic programming
+      // dynamic programming 1
       solve_3(final_position);
       make_custom_pdf_file("example.pdf",final_position,&max_road_speed[0],solution_best.n_moves,&solution_best.positions[0],solution_elapsed_time,solution_count,"DP");
     } else if (solve_to_use == 4)
     {
-      // dynamic programming
+      // dynamic programming 2
       solve_4(final_position);
       make_custom_pdf_file("example.pdf",final_position,&max_road_speed[0],solution_best.n_moves,&solution_best.positions[0],solution_elapsed_time,solution_count,"DP_test");
     }
 
+    // print the results
     printf("mad road speeds:");
     for(i = 0;i <= final_position;i++)
       printf(" %d",max_road_speed[i]);
@@ -371,7 +369,7 @@ int main(int argc,char *argv[argc + 1])
   }
 
   // initialization
-  n_mec = (argc < 2) ? 0xAED2022 : atoi(argv[1]);
+  n_mec = (argc < 2) ? 0xAED2022 : atoi(argv[1]); // n_mec needs to be the first argument
   srandom((unsigned int)n_mec);
   init_road_speeds();
 
@@ -403,7 +401,7 @@ int main(int argc,char *argv[argc + 1])
         printf(" %3d %16lu %9.3e |",solution_1_best.n_moves,solution_1_count,solution_1_elapsed_time);
       }
     } else if (solve_to_use == 2) {
-      // clever bruteforcing
+      // second solution method (clever bruteforcing)
       if(solution_elapsed_time < _time_limit_)
       {
         solve_2(final_position);
@@ -415,26 +413,26 @@ int main(int argc,char *argv[argc + 1])
         printf(" %3d %16lu %9.3e |",solution_best.n_moves,solution_count,solution_elapsed_time);
       }
     } else if (solve_to_use == 3) {
-      // dynamic programming
+      // third solution method (dynamic programming 1)
       if(solution_elapsed_time < _time_limit_)
       {
         solve_3(final_position);
         if(print_this_one != 0)
         {
           sprintf(file_name,"%03d_3.pdf",final_position);
-          make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_best.n_moves,&solution_best.positions[0],solution_elapsed_time,solution_count,"DP");
+          make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_best.n_moves,&solution_best.positions[0],solution_elapsed_time,solution_count,"DP_1");
         }
         printf(" %3d %16lu %9.3e |",solution_best.n_moves,solution_count,solution_elapsed_time);
       }
     } else if (solve_to_use == 4) {
-      // dynamic programming
+      // fourth solution method (dynamic programming 1)
       if(solution_elapsed_time < _time_limit_)
       {
         solve_4(final_position);
         if(print_this_one != 0)
         {
           sprintf(file_name,"%03d_4.pdf",final_position);
-          make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_best.n_moves,&solution_best.positions[0],solution_elapsed_time,solution_count,"DP_test");
+          make_custom_pdf_file(file_name,final_position,&max_road_speed[0],solution_best.n_moves,&solution_best.positions[0],solution_elapsed_time,solution_count,"DP_2");
         }
         printf(" %3d %16lu %9.3e |",solution_best.n_moves,solution_count,solution_elapsed_time);
       }
