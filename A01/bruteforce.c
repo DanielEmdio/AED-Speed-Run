@@ -9,11 +9,6 @@
 #include "make_custom_pdf.c"
 #include "../P02/elapsed_time.h"
 
-// change macros to change the solving method
-#define USE_SOLVE_1 0
-#define USE_SOLVE_2 0
-#define USE_SOLVE_3 1
-
 static int max_road_speed[1 + _max_road_size_]; // positions 0.._max_road_size_
 static int solve_to_use = -1;
 
