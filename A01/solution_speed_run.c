@@ -336,7 +336,7 @@ int main(int argc,char *argv[argc + 1])
   char file_name[64];
   bool do_example = false;
 
-  // basic argument check
+  // basic argument parsing
   for (int i = 1; i < argc; i++)
    {
     // generate the example data
@@ -377,7 +377,7 @@ int main(int argc,char *argv[argc + 1])
   final_position = 1;
   solution_1_elapsed_time = 0.0;
   printf("    + --- ---------------- --------- +\n");
-  printf("    |                plain recursion |\n");
+  printf("    |             solution results   |\n");
   printf("--- + --- ---------------- --------- +\n");
   printf("  n | sol            count  cpu time |\n");
   printf("--- + --- ---------------- --------- +\n");
