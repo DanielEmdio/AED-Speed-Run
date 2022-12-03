@@ -162,13 +162,13 @@ static void solve_3(int final_position)
 
   solution_3_DP(0, 0, 0, final_position);
 
-  /*for (int i = 0; i < 1 + final_position; i++) {
+  for (int i = 0; i < 1 + final_position; i++) {
     for (int j = 0; j < 9; j++){
       printf("%d ", DP[i][j]);
     }
     printf("\n");
   }
-  printf("\n");*/
+  printf("\n");
 
   solution_elapsed_time = cpu_time() - solution_elapsed_time;
 }
